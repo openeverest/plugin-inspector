@@ -28,12 +28,14 @@ type container struct {
 	Ready    bool   `json:"ready"`
 	Restarts int32  `json:"restarts"`
 	Status   string `json:"status"`
+	Reason   string `json:"reason,omitempty"`
 }
 
 type component struct {
 	Name       string      `json:"name"`
 	Type       string      `json:"type"`
 	Status     string      `json:"status"`
+	Reason     string      `json:"reason,omitempty"`
 	NodeName   string      `json:"nodeName,omitempty"`
 	Started    string      `json:"started,omitempty"`
 	Restarts   int32       `json:"restarts"`
@@ -115,8 +117,10 @@ func toComponent(pod corev1.Pod) component {
 			c.Started = formatTime(cs.State.Running.StartedAt)
 		case cs.State.Waiting != nil:
 			c.Status = "Waiting"
+			c.Reason = cs.State.Waiting.Reason
 		case cs.State.Terminated != nil:
 			c.Status = "Terminated"
+			c.Reason = cs.State.Terminated.Reason
 		}
 		containers = append(containers, c)
 	}
@@ -125,6 +129,7 @@ func toComponent(pod corev1.Pod) component {
 		Name:       pod.Name,
 		Type:       pod.Labels[componentLabel],
 		Status:     string(pod.Status.Phase),
+		Reason:     podReason(pod),
 		NodeName:   pod.Spec.NodeName,
 		Restarts:   restarts,
 		Ready:      fmt.Sprintf("%d/%d", ready, len(pod.Status.ContainerStatuses)),
@@ -134,6 +139,25 @@ func toComponent(pod corev1.Pod) component {
 		comp.Started = formatTime(*pod.Status.StartTime)
 	}
 	return comp
+}
+
+// podReason is the one-word "why" kubectl shows in its STATUS column: an explicit
+// pod reason (e.g. Evicted), an unschedulable pod, or the first stuck container.
+func podReason(pod corev1.Pod) string {
+	if pod.Status.Reason != "" {
+		return pod.Status.Reason
+	}
+	for _, cond := range pod.Status.Conditions {
+		if cond.Type == corev1.PodScheduled && cond.Status == corev1.ConditionFalse && cond.Reason != "" {
+			return cond.Reason
+		}
+	}
+	for _, cs := range slices.Concat(pod.Status.InitContainerStatuses, pod.Status.ContainerStatuses) {
+		if cs.State.Waiting != nil && cs.State.Waiting.Reason != "" {
+			return cs.State.Waiting.Reason
+		}
+	}
+	return ""
 }
 
 func formatTime(t metav1.Time) string {

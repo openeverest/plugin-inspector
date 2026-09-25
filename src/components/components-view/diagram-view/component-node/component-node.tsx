@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react';
 import type { NodeProps } from '@xyflow/react';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import {
   Box,
@@ -24,12 +25,18 @@ import { DiagramNode } from '../diagram-node/diagram-node';
 
 export const ComponentNode = ({ data }: NodeProps<ComponentNodeType>) => {
   const component = data.componentData;
-  const { name, status, ready, type, restarts, started, nodeName } = component;
-  const { viewLogs } = useInspectorContext();
+  const { name, status, reason, ready, type, restarts, started, nodeName } = component;
+  const { viewLogs, describePod } = useInspectorContext();
 
+  // Node clicks toggle the containers, so actions must not bubble up.
   const handleViewLogs = (e: MouseEvent) => {
     e.stopPropagation();
     viewLogs(name);
+  };
+
+  const handleDescribe = (e: MouseEvent) => {
+    e.stopPropagation();
+    describePod(name);
   };
 
   return (
@@ -41,8 +48,12 @@ export const ComponentNode = ({ data }: NodeProps<ComponentNodeType>) => {
       showBottomHandle
       dataTestId={`component-node-${name}`}
     >
-      <Stack direction="row" sx={{ alignItems: 'center' }}>
-        <StatusIndicator status={componentBaseStatus(component)} label={status} />
+      <Stack direction="row" sx={{ alignItems: 'flex-start' }}>
+        <StatusIndicator
+          status={componentBaseStatus(component)}
+          label={status}
+          reason={reason}
+        />
         <Typography variant="body1" sx={{ ml: 'auto' }}>
           {Messages.readyCount(ready)}
         </Typography>
@@ -73,17 +84,24 @@ export const ComponentNode = ({ data }: NodeProps<ComponentNodeType>) => {
         }}
       >
         {type ? <Chip label={type} size="small" /> : <span />}
-        {hasLogs(component) && (
-          <Tooltip title={Messages.viewLogs}>
-            <IconButton
-              onClick={handleViewLogs}
-              size="small"
-              aria-label={Messages.viewLogs}
-            >
-              <VisibilityOutlinedIcon fontSize="small" />
+        <Box sx={{ display: 'flex' }}>
+          <Tooltip title={Messages.describe}>
+            <IconButton onClick={handleDescribe} size="small" aria-label={Messages.describe}>
+              <InfoOutlinedIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-        )}
+          {hasLogs(component) && (
+            <Tooltip title={Messages.viewLogs}>
+              <IconButton
+                onClick={handleViewLogs}
+                size="small"
+                aria-label={Messages.viewLogs}
+              >
+                <VisibilityOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
     </DiagramNode>
   );

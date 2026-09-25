@@ -35,7 +35,11 @@ export const ContainerNode = ({ data }: NodeProps<ContainerNodeType>) => {
       dataTestId={`container-node-${name}`}
     >
       <Stack direction="row" sx={{ alignItems: 'center' }}>
-        <StatusIndicator status={containerBaseStatus(container)} label={status} />
+        <StatusIndicator
+          status={containerBaseStatus(container)}
+          label={status}
+          reason={container.reason}
+        />
         <Typography variant="body2" sx={{ ml: 'auto' }}>
           {Messages.containerReady(ready)}
         </Typography>

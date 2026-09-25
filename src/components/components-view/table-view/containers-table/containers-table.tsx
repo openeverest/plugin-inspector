@@ -34,6 +34,7 @@ export const ContainersTable = ({ component }: ContainersTableProps) => {
               <StatusIndicator
                 status={containerBaseStatus(container)}
                 label={container.status}
+                reason={container.reason}
               />
             </TableCell>
             <TableCell>

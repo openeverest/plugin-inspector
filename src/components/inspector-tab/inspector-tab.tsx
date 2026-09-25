@@ -3,6 +3,7 @@ import { Alert, Box, CircularProgress, Stack } from '@openeverest/ui-lib';
 import { ComponentsView } from 'components/components-view/components-view';
 import { InspectorContext } from 'components/inspector-context/inspector.context';
 import { LogsPanel } from 'components/logs-panel/logs-panel';
+import { PodDescribeDrawer } from 'components/pod-describe-drawer/pod-describe-drawer';
 import { useInstanceComponents } from 'hooks/useInstanceComponents';
 import { LogsSelection } from 'types/components.types';
 import { Messages } from './inspector-tab.messages';
@@ -18,11 +19,13 @@ export const InspectorTab = ({ namespace, instanceName }: InspectorTabProps) => 
   const [selection, setSelection] = useState<LogsSelection | null>(null);
   // Lives here so it survives the logs panel remounting on pod/container change.
   const [logFilter, setLogFilter] = useState('');
+  const [describedPod, setDescribedPod] = useState<string | null>(null);
   const logsRef = useRef<HTMLDivElement>(null);
 
   const inspectorContext = useMemo(
     () => ({
       viewLogs: (pod: string, container?: string) => setSelection({ pod, container }),
+      describePod: setDescribedPod,
     }),
     []
   );
@@ -64,6 +67,11 @@ export const InspectorTab = ({ namespace, instanceName }: InspectorTabProps) => 
           </Box>
         )}
       </Stack>
+      <PodDescribeDrawer
+        target={target}
+        pod={describedPod}
+        onClose={() => setDescribedPod(null)}
+      />
     </InspectorContext.Provider>
   );
 };

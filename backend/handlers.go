@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/client-go/kubernetes"
 )
@@ -92,17 +93,7 @@ func (s *server) handleComponents(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/components/{pod}/logs?k8sCluster=&namespace=&instance=&container=&follow=&previous=&tailLines=
 func (s *server) handleLogs(w http.ResponseWriter, r *http.Request) {
-	podName := r.PathValue("pod")
-	if len(validation.IsDNS1123Subdomain(podName)) > 0 {
-		writeError(w, badRequest("invalid pod"))
-		return
-	}
-	ref, in, err := s.authorize(r)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	pod, err := instancePod(r.Context(), s.kube, ref.namespace, ref.name, podName, in)
+	ref, pod, err := s.authorizePod(r)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -120,6 +111,35 @@ func (s *server) handleLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	defer stream.Close()
 	streamToResponse(r.Context(), w, stream)
+}
+
+// GET /api/components/{pod}/describe?k8sCluster=&namespace=&instance=
+func (s *server) handleDescribe(w http.ResponseWriter, r *http.Request) {
+	_, pod, err := s.authorizePod(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	description, err := describePod(r.Context(), s.kube, pod)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, description)
+}
+
+// authorizePod resolves the {pod} path value, only if it belongs to an instance the caller can read.
+func (s *server) authorizePod(r *http.Request) (instanceRef, *corev1.Pod, error) {
+	podName := r.PathValue("pod")
+	if len(validation.IsDNS1123Subdomain(podName)) > 0 {
+		return instanceRef{}, nil, badRequest("invalid pod")
+	}
+	ref, in, err := s.authorize(r)
+	if err != nil {
+		return ref, nil, err
+	}
+	pod, err := instancePod(r.Context(), s.kube, ref.namespace, ref.name, podName, in)
+	return ref, pod, err
 }
 
 func writeJSON(w http.ResponseWriter, v any) {

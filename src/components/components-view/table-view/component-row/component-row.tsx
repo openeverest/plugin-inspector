@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import {
   Collapse,
@@ -24,7 +25,7 @@ interface ComponentRowProps {
 
 export const ComponentRow = ({ component }: ComponentRowProps) => {
   const [open, setOpen] = useState(false);
-  const { viewLogs } = useInspectorContext();
+  const { viewLogs, describePod } = useInspectorContext();
 
   return (
     <>
@@ -39,7 +40,11 @@ export const ComponentRow = ({ component }: ComponentRowProps) => {
           </IconButton>
         </TableCell>
         <TableCell>
-          <StatusIndicator status={componentBaseStatus(component)} label={component.status} />
+          <StatusIndicator
+            status={componentBaseStatus(component)}
+            label={component.status}
+            reason={component.reason}
+          />
         </TableCell>
         <TableCell>{component.ready}</TableCell>
         <TableCell>{component.name}</TableCell>
@@ -49,7 +54,16 @@ export const ComponentRow = ({ component }: ComponentRowProps) => {
           <ComponentAge date={component.started} />
         </TableCell>
         <TableCell>{component.restarts}</TableCell>
-        <TableCell align="right">
+        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+          <Tooltip title={Messages.describe}>
+            <IconButton
+              size="small"
+              aria-label={Messages.describe}
+              onClick={() => describePod(component.name)}
+            >
+              <InfoOutlinedIcon />
+            </IconButton>
+          </Tooltip>
           {hasLogs(component) && (
             <Tooltip title={Messages.viewLogs}>
               <IconButton

@@ -3,6 +3,7 @@ export const Messages = {
   tableView: 'Table view',
   resetView: 'Reset view',
   viewLogs: 'View logs',
+  describe: 'Describe pod',
   noComponents: 'No matching pods',
   readyCount: (ready: string) => `${ready} Ready`,
   containerReady: (ready: boolean) => (ready ? 'Ready' : 'Not ready'),

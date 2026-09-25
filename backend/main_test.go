@@ -9,6 +9,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -19,6 +21,7 @@ func testPod(name, instanceName string) *corev1.Pod {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: "db",
+			UID:       types.UID(name + "-uid"),
 			Labels:    map[string]string{instanceLabel: instanceName, componentLabel: "engine"},
 		},
 		Spec: corev1.PodSpec{
@@ -60,14 +63,9 @@ func fakeEverest(t *testing.T, podRefs []string) *httptest.Server {
 	return srv
 }
 
-func newTestMux(t *testing.T, podRefs []string, pods ...*corev1.Pod) *http.ServeMux {
+func newTestMux(t *testing.T, podRefs []string, objects ...runtime.Object) *http.ServeMux {
 	t.Helper()
-	kube := fake.NewClientset()
-	for _, p := range pods {
-		if _, err := kube.CoreV1().Pods(p.Namespace).Create(t.Context(), p, metav1.CreateOptions{}); err != nil {
-			t.Fatal(err)
-		}
-	}
+	kube := fake.NewClientset(objects...)
 	return newMux(&server{kube: kube, everest: newEverestClient(fakeEverest(t, podRefs).URL)})
 }
 
@@ -154,7 +152,7 @@ func TestComponentsFallsBackToInstanceLabel(t *testing.T) {
 }
 
 func TestLogs(t *testing.T) {
-	pods := []*corev1.Pod{testPod("mydb-0", "mydb"), testPod("mydb-1", "mydb"), testPod("other-0", "other")}
+	pods := []runtime.Object{testPod("mydb-0", "mydb"), testPod("mydb-1", "mydb"), testPod("other-0", "other")}
 
 	cases := []struct {
 		name    string

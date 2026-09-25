@@ -18,6 +18,8 @@ export interface Container {
   ready: boolean;
   restarts: number;
   status: ContainerStatus;
+  /** Waiting/termination reason, e.g. CrashLoopBackOff or OOMKilled. */
+  reason?: string;
 }
 
 /** A pod backing the instance, as returned by the plugin backend. */
@@ -25,6 +27,8 @@ export interface InstanceComponent {
   name: string;
   type: string;
   status: ComponentStatus;
+  /** Why the pod is stuck, e.g. Unschedulable or ImagePullBackOff. */
+  reason?: string;
   nodeName?: string;
   started?: string;
   restarts: number;
