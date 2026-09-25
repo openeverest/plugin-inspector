@@ -1,0 +1,48 @@
+---
+name: Setup frontend
+description: >-
+  Builds @openeverest/plugin-sdk and @openeverest/ui-lib from the core repo and
+  installs the plugin's npm dependencies. Expects the plugin checked out at
+  ./plugin-inspector so its `file:../openeverest/...` dependencies resolve.
+inputs:
+  core-ref:
+    description: openeverest/openeverest ref providing the plugin SDK packages
+    required: false
+    # The packages are not on npm yet and only exist on this branch until
+    # openeverest/openeverest#3076 merges; switch to `main` then.
+    default: poc/plugin-design-unification
+runs:
+  using: composite
+  steps:
+    - name: Checkout core UI packages
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        repository: openeverest/openeverest
+        ref: ${{ inputs.core-ref }}
+        path: openeverest
+        sparse-checkout: ui
+
+    # No version input: reads `packageManager` from the core ui/package.json.
+    - uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v6.0.5
+      with:
+        package_json_file: openeverest/ui/package.json
+
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version: "22"
+        cache: npm
+        cache-dependency-path: plugin-inspector/package-lock.json
+
+    - name: Build plugin SDK packages
+      shell: bash
+      working-directory: openeverest/ui
+      run: |
+        pnpm install --frozen-lockfile \
+          --filter "@openeverest/plugin-sdk..." \
+          --filter "@openeverest/ui-lib..."
+        pnpm --filter @openeverest/plugin-sdk --filter @openeverest/ui-lib build
+
+    - name: Install plugin dependencies
+      shell: bash
+      working-directory: plugin-inspector
+      run: npm ci
