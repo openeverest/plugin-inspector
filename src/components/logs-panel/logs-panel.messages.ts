@@ -1,0 +1,21 @@
+export const Messages = {
+  title: 'Logs',
+  pod: 'Pod',
+  container: 'Container',
+  previous: 'Previous container',
+  previousHint: 'Logs of the last terminated instance of this container',
+  copy: 'Copy logs',
+  copied: 'Copied!',
+  download: 'Download logs',
+  close: 'Close logs',
+  connecting: 'Connecting…',
+  noLogs: 'No logs available',
+  noPod: 'This pod is no longer part of the instance',
+  loadFailed: (reason: string) => `Failed to load logs: ${reason}`,
+  filter: 'Filter lines',
+  clearFilter: 'Clear filter',
+  matchCount: (matched: number, total: number) => `${matched} of ${total} lines`,
+  noMatches: (query: string) => `No lines contain "${query}"`,
+  fileName: (instance: string, pod: string, container: string) =>
+    `${instance}-${pod}-${container}-logs.txt`,
+};

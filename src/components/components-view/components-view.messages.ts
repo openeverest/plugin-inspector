@@ -1,0 +1,24 @@
+export const Messages = {
+  search: 'Search',
+  tableView: 'Table view',
+  resetView: 'Reset view',
+  viewLogs: 'View logs',
+  noComponents: 'No matching pods',
+  readyCount: (ready: string) => `${ready} Ready`,
+  containerReady: (ready: boolean) => (ready ? 'Ready' : 'Not ready'),
+  ageAndRestarts: (age: string, restarts: number) =>
+    `${age ? `${age} | ` : ''}${restarts} restarts`,
+  onNode: (node: string) => `on ${node}`,
+  columns: {
+    status: 'Status',
+    ready: 'Ready',
+    name: 'Name',
+    type: 'Type',
+    node: 'Node',
+    age: 'Age',
+    restarts: 'Restarts',
+    actions: 'Actions',
+  },
+  expandRow: 'Show containers',
+  collapseRow: 'Hide containers',
+};

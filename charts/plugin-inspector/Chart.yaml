@@ -1,0 +1,6 @@
+apiVersion: v2
+name: plugin-inspector
+description: OpenEverest plugin that shows pods, containers and logs of database instances
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
