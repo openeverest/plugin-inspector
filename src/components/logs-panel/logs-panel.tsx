@@ -19,7 +19,7 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { InstanceTarget } from 'api/inspector-api';
 import { SUNKEN_SURFACE_SX } from 'components/surface.constants';
 import { useComponentLogsStream } from 'hooks/useComponentLogsStream';

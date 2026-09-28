@@ -9,7 +9,7 @@ import {
   Stack,
   Tooltip,
   Typography,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { InstanceTarget } from 'api/inspector-api';
 import { usePodDescription } from 'hooks/usePodDescription';
 import { DescribeBody } from './describe-body/describe-body';

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Tooltip, Typography } from '@openeverest/ui-lib';
+import { Tooltip, Typography } from '@mui/material';
 import { format, formatDuration, intervalToDuration, isValid } from 'date-fns';
 import { AGE_UNITS, DATE_FORMAT } from './component-age.constants';
 import { Messages } from './component-age.messages';

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Paper, Stack } from '@openeverest/ui-lib';
+import { Paper, Stack } from '@mui/material';
 
 interface DiagramNodeProps {
   width: number;

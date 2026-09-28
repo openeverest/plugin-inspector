@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Box, CircularProgress, Stack } from '@openeverest/ui-lib';
+import { Alert, Box, CircularProgress, Stack } from '@mui/material';
 import { ComponentsView } from 'components/components-view/components-view';
 import { InspectorContext } from 'components/inspector-context/inspector.context';
 import { LogsPanel } from 'components/logs-panel/logs-panel';

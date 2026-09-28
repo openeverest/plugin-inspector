@@ -9,7 +9,7 @@ import {
 } from '@xyflow/react';
 import type { NodeChange } from '@xyflow/react';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { Box, Button, styled } from '@openeverest/ui-lib';
+import { Box, Button, styled } from '@mui/material';
 import { SUNKEN_SURFACE_SX } from 'components/surface.constants';
 import { InstanceComponent } from 'types/components.types';
 import { Messages } from '../components-view.messages';

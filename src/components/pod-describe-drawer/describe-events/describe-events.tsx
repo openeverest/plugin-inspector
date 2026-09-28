@@ -7,7 +7,7 @@ import {
   TableRow,
   Tooltip,
   Typography,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { PodEvent } from 'types/describe.types';
 import { Messages } from '../pod-describe-drawer.messages';
 import { timeAgo } from '../pod-describe-drawer.utils';

@@ -3,7 +3,7 @@
 # Installs the released OpenEverest v2 core, then builds this plugin's frontend
 # bundle + backend image and deploys the plugin chart with rebuild on change.
 #
-# The frontend relies on the host React import map and @openeverest/ui-lib. If
+# The frontend relies on the host React import map and --everest-* design tokens. If
 # the released core predates them, set INSTALL_OPENEVEREST=false and run the
 # core from source in a separate Tilt instance.
 #

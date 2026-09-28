@@ -1,4 +1,4 @@
-import { Stack } from '@openeverest/ui-lib';
+import { Stack } from '@mui/material';
 import { PodDescription } from 'types/describe.types';
 import { DescribeConditions } from '../describe-conditions/describe-conditions';
 import { DescribeContainer } from '../describe-container/describe-container';

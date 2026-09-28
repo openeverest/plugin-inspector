@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Box, Typography } from '@openeverest/ui-lib';
+import { Box, Typography } from '@mui/material';
 
 export interface Field {
   label: string;

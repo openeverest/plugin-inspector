@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography } from '@openeverest/ui-lib';
+import { Paper, Stack, Typography } from '@mui/material';
 import { ContainerDescription } from 'types/describe.types';
 import { FieldList } from '../field-list/field-list';
 import { Messages } from '../pod-describe-drawer.messages';

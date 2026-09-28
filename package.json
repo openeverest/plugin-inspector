@@ -15,7 +15,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^7.3.0",
     "@mui/material": "^7.3.0",
-    "@openeverest/ui-lib": "file:../openeverest/ui/packages/plugin-ui-lib",
+    "@openeverest/plugin-theme": "file:../openeverest/ui/packages/plugin-theme",
     "@tanstack/react-query": "^5.22.2",
     "@xyflow/react": "^12.3.6",
     "dagre": "^0.8.5",
