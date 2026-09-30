@@ -38,8 +38,6 @@ export default defineConfig(({ command }) => ({
         replacement: srcDir('shims/use-sync-external-store-with-selector.ts'),
       },
     ],
-    // @openeverest/* are linked from the core repo with their own node_modules; use this plugin's copies.
-    dedupe: ['@mui/material', '@emotion/react', '@emotion/styled', '@emotion/cache'],
   },
   // Library mode leaves process.env untouched, but MUI and React Query read NODE_ENV.
   define:
