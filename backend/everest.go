@@ -38,24 +38,14 @@ func (e *statusError) Error() string { return e.message }
 // instance is the subset of the Instance CR the plugin needs.
 type instance struct {
 	Status struct {
-		Components []struct {
-			PodRefs []struct {
-				Name string `json:"name"`
-			} `json:"podRefs"`
-		} `json:"components"`
+		Components []instanceComponent `json:"components"`
 	} `json:"status"`
 }
 
-func (in *instance) podRefNames() []string {
-	var names []string
-	for _, c := range in.Status.Components {
-		for _, ref := range c.PodRefs {
-			if ref.Name != "" {
-				names = append(names, ref.Name)
-			}
-		}
-	}
-	return names
+// instanceComponent is a component whose pods the provider runtime reports.
+type instanceComponent struct {
+	Name     string `json:"name"`
+	Selector string `json:"selector"`
 }
 
 type everestClient struct {

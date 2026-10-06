@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"net/http"
@@ -12,12 +13,16 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/kubernetes"
 )
 
 const (
 	instanceLabel  = "app.kubernetes.io/instance"
 	componentLabel = "app.kubernetes.io/component"
+
+	everestInstanceLabel  = "core.openeverest.io/instance"
+	everestComponentLabel = "core.openeverest.io/component"
 )
 
 var errPodNotInInstance = &statusError{status: http.StatusNotFound, message: "pod not found in instance"}
@@ -43,31 +48,21 @@ type component struct {
 	Containers []container `json:"containers"`
 }
 
-// instancePods returns the pods backing an instance. Providers that report
-// status.components[].podRefs are authoritative; otherwise fall back to the
-// conventional operator label.
+// instancePods returns the pods backing an instance: the pods of each component
+// in status.components, or else the pods with the conventional operator label.
 func instancePods(ctx context.Context, kube kubernetes.Interface, namespace, name string, in *instance) ([]corev1.Pod, error) {
-	refs := in.podRefNames()
-	if len(refs) == 0 {
-		list, err := kube.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{
-			LabelSelector: labels.SelectorFromSet(labels.Set{instanceLabel: name}).String(),
-		})
+	selectors := componentSelectors(name, in)
+	if len(selectors) == 0 {
+		selectors = []labels.Selector{labels.SelectorFromSet(labels.Set{instanceLabel: name})}
+	}
+
+	var pods []corev1.Pod
+	for _, selector := range selectors {
+		list, err := kube.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: selector.String()})
 		if err != nil {
 			return nil, fmt.Errorf("list pods: %w", err)
 		}
-		return list.Items, nil
-	}
-
-	pods := make([]corev1.Pod, 0, len(refs))
-	for _, ref := range refs {
-		pod, err := kube.CoreV1().Pods(namespace).Get(ctx, ref, metav1.GetOptions{})
-		if apierrors.IsNotFound(err) {
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("get pod %s: %w", ref, err)
-		}
-		pods = append(pods, *pod)
+		pods = append(pods, list.Items...)
 	}
 	return pods, nil
 }
@@ -75,10 +70,6 @@ func instancePods(ctx context.Context, kube kubernetes.Interface, namespace, nam
 // instancePod returns a single pod, but only if it belongs to the instance, so a
 // caller who can read one instance can't read logs of other pods in the namespace.
 func instancePod(ctx context.Context, kube kubernetes.Interface, namespace, name, podName string, in *instance) (*corev1.Pod, error) {
-	refs := in.podRefNames()
-	if len(refs) > 0 && !slices.Contains(refs, podName) {
-		return nil, errPodNotInInstance
-	}
 	pod, err := kube.CoreV1().Pods(namespace).Get(ctx, podName, metav1.GetOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil, errPodNotInInstance
@@ -86,10 +77,35 @@ func instancePod(ctx context.Context, kube kubernetes.Interface, namespace, name
 	if err != nil {
 		return nil, fmt.Errorf("get pod %s: %w", podName, err)
 	}
-	if len(refs) == 0 && pod.Labels[instanceLabel] != name {
+
+	selectors := componentSelectors(name, in)
+	inInstance := pod.Labels[instanceLabel] == name
+	if len(selectors) > 0 {
+		inInstance = slices.ContainsFunc(selectors, func(s labels.Selector) bool { return s.Matches(labels.Set(pod.Labels)) })
+	}
+	if !inInstance {
 		return nil, errPodNotInInstance
 	}
 	return pod, nil
+}
+
+// componentSelectors parses the pod selectors in status.components, each
+// narrowed to the instance's own pods so it can never reach another instance.
+func componentSelectors(name string, in *instance) []labels.Selector {
+	own, err := labels.NewRequirement(everestInstanceLabel, selection.Equals, []string{name})
+	if err != nil {
+		return nil
+	}
+
+	var selectors []labels.Selector
+	for _, c := range in.Status.Components {
+		selector, err := labels.Parse(c.Selector)
+		if c.Selector == "" || err != nil {
+			continue
+		}
+		selectors = append(selectors, selector.Add(*own))
+	}
+	return selectors
 }
 
 func toComponents(pods []corev1.Pod) []component {
@@ -127,7 +143,7 @@ func toComponent(pod corev1.Pod) component {
 
 	comp := component{
 		Name:       pod.Name,
-		Type:       pod.Labels[componentLabel],
+		Type:       cmp.Or(pod.Labels[everestComponentLabel], pod.Labels[componentLabel]),
 		Status:     string(pod.Status.Phase),
 		Reason:     podReason(pod),
 		NodeName:   pod.Spec.NodeName,
