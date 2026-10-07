@@ -5,7 +5,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { PodCondition } from 'types/describe.types';
 import { Messages } from '../pod-describe-drawer.messages';
 

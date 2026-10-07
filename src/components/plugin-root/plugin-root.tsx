@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import xyflowStyles from '@xyflow/react/dist/style.css?inline';
 import type { PluginApi } from '@openeverest/plugin-sdk';
-import { PluginThemeProvider } from '@openeverest/ui-lib';
+import { PluginThemeProvider } from '@openeverest/plugin-theme';
 import { PluginApiContext } from 'components/plugin-api-context/plugin-api.context';
 
 // Must be unique across plugins so Emotion caches never collide.

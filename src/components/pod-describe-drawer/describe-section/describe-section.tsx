@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Stack, Typography } from '@openeverest/ui-lib';
+import { Stack, Typography } from '@mui/material';
 
 interface DescribeSectionProps {
   title: string;

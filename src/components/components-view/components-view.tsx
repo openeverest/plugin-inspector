@@ -6,7 +6,7 @@ import {
   Stack,
   Switch,
   TextField,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { InstanceComponent } from 'types/components.types';
 import { Messages } from './components-view.messages';
 import { filterComponents } from './components-view.utils';

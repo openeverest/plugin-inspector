@@ -9,7 +9,7 @@ import {
   TableCell,
   TableRow,
   Tooltip,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { ComponentAge } from 'components/component-age/component-age';
 import { useInspectorContext } from 'components/inspector-context/inspector.context';
 import { StatusIndicator } from 'components/status-indicator/status-indicator';

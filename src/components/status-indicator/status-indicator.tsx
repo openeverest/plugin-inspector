@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@openeverest/ui-lib';
+import { Box, Stack, Typography } from '@mui/material';
 import { BASE_STATUS_COLOR } from './status-indicator.constants';
 import { StatusIndicatorProps } from './status-indicator.types';
 

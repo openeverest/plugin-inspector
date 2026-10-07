@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
-} from '@openeverest/ui-lib';
+} from '@mui/material';
 import { InstanceComponent } from 'types/components.types';
 import { Messages } from '../components-view.messages';
 import { ComponentRow } from './component-row/component-row';
