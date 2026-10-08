@@ -26,7 +26,13 @@ export const PodDescribeDrawer = ({ target, pod, onClose }: PodDescribeDrawerPro
   const { data, isLoading, error } = usePodDescription(target, pod);
 
   return (
-    <Drawer anchor="right" open={pod !== null} onClose={onClose}>
+    <Drawer
+      anchor="right"
+      open={pod !== null}
+      onClose={onClose}
+      // Host app bar sits at zIndex.drawer + 1; a modal drawer must overlay it.
+      sx={{ zIndex: (theme) => theme.zIndex.modal }}
+    >
       <Box sx={{ width: DRAWER_WIDTH, maxWidth: '100vw', p: 3 }} data-testid="pod-describe-drawer">
         <Stack direction="row" sx={{ alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ wordBreak: 'break-all' }}>
