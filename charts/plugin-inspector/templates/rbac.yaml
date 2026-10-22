@@ -7,7 +7,7 @@ metadata:
     {{- include "plugin-inspector.labels" . | nindent 4 }}
 ---
 # Cluster-wide because database namespaces are created dynamically. Read-only;
-# the backend only serves pods of instances the caller can read via the Everest API.
+# the backend only serves pods and Services of instances the caller can read via the Everest API.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -23,6 +23,12 @@ rules:
     verbs: ["get"]
   - apiGroups: [""]
     resources: ["events"]
+    verbs: ["list"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["list"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
     verbs: ["list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

@@ -91,6 +91,26 @@ func (s *server) handleComponents(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, toComponents(pods))
 }
 
+// GET /api/services?k8sCluster=&namespace=&instance=
+func (s *server) handleServices(w http.ResponseWriter, r *http.Request) {
+	ref, in, err := s.authorize(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	pods, err := instancePods(r.Context(), s.kube, ref.namespace, ref.name, in)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	services, err := instanceServices(r.Context(), s.kube, ref.namespace, pods)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, services)
+}
+
 // GET /api/components/{pod}/logs?k8sCluster=&namespace=&instance=&container=&follow=&previous=&tailLines=
 func (s *server) handleLogs(w http.ResponseWriter, r *http.Request) {
 	ref, pod, err := s.authorizePod(r)

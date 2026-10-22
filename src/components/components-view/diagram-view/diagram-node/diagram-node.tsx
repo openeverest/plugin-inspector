@@ -33,7 +33,7 @@ export const DiagramNode = ({
       data-testid={dataTestId}
       sx={{ cursor: clickable ? 'pointer' : 'default' }}
     >
-      <Stack sx={{ p: 2, minHeight: height, width }}>{children}</Stack>
+      <Stack sx={{ p: 2, minHeight: height, width, boxSizing: 'border-box' }}>{children}</Stack>
     </Paper>
     {showBottomHandle && (
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />

@@ -48,10 +48,10 @@ export const ContainerNode = ({ data }: NodeProps<ContainerNodeType>) => {
         <Typography variant="body1" sx={ELLIPSIS_SX}>
           {name}
         </Typography>
-        {data.parentId && containerHasLogs(container) && (
+        {containerHasLogs(container) && (
           <Tooltip title={Messages.viewLogs}>
             <IconButton
-              onClick={() => data.parentId && viewLogs(data.parentId, name)}
+              onClick={() => viewLogs(data.podName, name)}
               size="small"
               aria-label={Messages.viewLogs}
               sx={{ ml: 'auto' }}

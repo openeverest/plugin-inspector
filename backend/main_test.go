@@ -142,14 +142,14 @@ func TestComponentsUsesSelectorsWhenReported(t *testing.T) {
 	got := decodeComponents(t, rec)
 	require.Len(t, got, 2)
 	assert.Equal(t, "mydb-0", got[0].Name)
-	assert.Equal(t, "engine", got[0].Type)
+	assert.Equal(t, "engine", got[0].Component)
 	assert.Equal(t, "1/2", got[0].Ready)
 	assert.Equal(t, int32(3), got[0].Restarts)
 	assert.Equal(t, "node-a", got[0].NodeName)
 	assert.Equal(t, "Running", got[0].Containers[0].Status)
 	assert.Equal(t, "Waiting", got[0].Containers[1].Status)
 	assert.Equal(t, "mydb-proxy-0", got[1].Name)
-	assert.Equal(t, "proxy", got[1].Type)
+	assert.Equal(t, "proxy", got[1].Component)
 }
 
 func TestComponentsNarrowsSelectorsToTheInstance(t *testing.T) {
@@ -171,6 +171,23 @@ func TestComponentsFallsBackToInstanceLabel(t *testing.T) {
 	if len(got) != 2 || got[0].Name != "mydb-0" || got[1].Name != "mydb-1" {
 		t.Fatalf("components = %+v, want sorted mydb-0, mydb-1", got)
 	}
+	assert.Equal(t, "engine", got[0].Component, "falls back to the operator's component label")
+}
+
+func TestComponentsNamesPodsAfterTheMatchingComponent(t *testing.T) {
+	// The selector, not the pod's labels, decides which component a pod is in.
+	cfg := instanceComponent{Name: "configServer", Selector: "role=cfg"}
+	cfgPod := everestPod("mydb-cfg-0", "mydb", "engine")
+	cfgPod.Labels["role"] = "cfg"
+	mux := newTestMux(t, []instanceComponent{cfg, proxyComponent}, cfgPod, everestPod("mydb-mongos-0", "mydb", "proxy"))
+
+	rec := doRequest(mux, "/api/components", instanceQuery(nil), validToken)
+
+	got := decodeComponents(t, rec)
+	require.Len(t, got, 2)
+	assert.Equal(t, "configServer", got[0].Component)
+	assert.Equal(t, "mydb-cfg-0", got[0].Name)
+	assert.Equal(t, "proxy", got[1].Component)
 }
 
 func TestLogs(t *testing.T) {
