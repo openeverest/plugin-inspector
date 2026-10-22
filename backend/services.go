@@ -46,7 +46,8 @@ func instanceServices(ctx context.Context, kube kubernetes.Interface, namespace 
 		return nil, fmt.Errorf("list services: %w", err)
 	}
 
-	var res []service
+	// Non-nil so an instance without Services yet encodes as [] rather than null.
+	res := []service{}
 	var readiness map[string]map[string]bool
 	for _, svc := range list.Items {
 		selected := selectedPods(svc, pods)
