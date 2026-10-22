@@ -33,7 +33,7 @@ describe('ComponentsTableView', () => {
   afterEach(cleanup);
 
   it('lists pods under their component, sorted within each group', () => {
-    render(<ComponentsTableView components={components} />);
+    render(<ComponentsTableView components={components} services={[]} />);
 
     expect(rowNames()).toEqual([
       'group-row-engine',
@@ -46,7 +46,7 @@ describe('ComponentsTableView', () => {
   });
 
   it('hides and shows the pods of a group', () => {
-    render(<ComponentsTableView components={components} />);
+    render(<ComponentsTableView components={components} services={[]} />);
     const engineRow = screen.getByTestId('group-row-engine');
 
     fireEvent.click(within(engineRow).getByRole('button', { name: 'Hide pods' }));

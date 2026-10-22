@@ -1,6 +1,7 @@
 import dagre from 'dagre';
 import { Position } from '@xyflow/react';
 import { InstanceComponent } from 'types/components.types';
+import { InstanceService } from 'types/services.types';
 import { groupComponents } from 'utils/component-groups.utils';
 import {
   COMPONENT_NODE_HEIGHT,
@@ -9,19 +10,29 @@ import {
   CONTAINER_NODE_WIDTH,
   DIAGRAM_MAX_HEIGHT,
   DIAGRAM_MIN_HEIGHT,
+  ENDPOINT_NOT_READY_CLASS,
   GROUP_GAP,
   GROUP_HEADER_HEIGHT,
   GROUP_NODE_ID_PREFIX,
   GROUP_PADDING,
+  SERVICE_NODE_HEIGHT,
+  SERVICE_NODE_ID_PREFIX,
+  SERVICE_NODE_WIDTH,
 } from './diagram-view.constants';
 import { CustomEdge, CustomNode, GroupNodeType } from './diagram-view.types';
 
 const MIN_GROUP_WIDTH = COMPONENT_NODE_WIDTH + 2 * GROUP_PADDING;
 
-const nodeSize = (node: CustomNode) =>
-  node.type === 'containerNode'
-    ? { width: CONTAINER_NODE_WIDTH, height: CONTAINER_NODE_HEIGHT }
-    : { width: COMPONENT_NODE_WIDTH, height: COMPONENT_NODE_HEIGHT };
+const nodeSize = (node: CustomNode) => {
+  switch (node.type) {
+    case 'containerNode':
+      return { width: CONTAINER_NODE_WIDTH, height: CONTAINER_NODE_HEIGHT };
+    case 'serviceNode':
+      return { width: SERVICE_NODE_WIDTH, height: SERVICE_NODE_HEIGHT };
+    default:
+      return { width: COMPONENT_NODE_WIDTH, height: COMPONENT_NODE_HEIGHT };
+  }
+};
 
 const isGroupNode = (node: CustomNode): node is GroupNodeType => node.type === 'groupNode';
 
@@ -95,9 +106,11 @@ const layout = (nodes: CustomNode[], edges: CustomEdge[]) => {
   });
 };
 
-// React Flow needs every group node before its children.
+// A Service shows in each lane whose pods it selects, above those pods. React Flow
+// needs every group node before its children.
 export const buildGraph = (
   components: InstanceComponent[],
+  services: InstanceService[],
   selectedId?: string,
   collapsedGroupIds: ReadonlySet<string> = new Set()
 ) => {
@@ -113,6 +126,32 @@ export const buildGraph = (
       type: 'groupNode',
       position: { x: 0, y: 0 },
       data: { visible: true, collapsed: collapsedGroupIds.has(groupId), componentData: group },
+    });
+
+    const podNames = new Set(group.pods.map((pod) => pod.name));
+    services.forEach((service) => {
+      const targets = service.pods.filter((pod) => podNames.has(pod.name));
+      if (targets.length === 0) {
+        return;
+      }
+      const serviceId = `${SERVICE_NODE_ID_PREFIX}${group.name}/${service.name}`;
+      nodes.push({
+        id: serviceId,
+        type: 'serviceNode',
+        parentId: groupId,
+        position: { x: 0, y: 0 },
+        data: { visible: true, componentData: service },
+      });
+      targets.forEach((pod) => {
+        edges.push({
+          id: `e-${serviceId}-${pod.name}`,
+          source: serviceId,
+          target: pod.name,
+          type: 'smoothstep',
+          className: pod.ready ? undefined : ENDPOINT_NOT_READY_CLASS,
+          data: { kind: 'endpoint', visible: true },
+        });
+      });
     });
 
     group.pods.forEach((component) => {
@@ -139,7 +178,7 @@ export const buildGraph = (
           source: component.name,
           target: id,
           type: 'smoothstep',
-          data: { visible: isSelected },
+          data: { kind: 'container', visible: isSelected },
         });
       });
     });
@@ -164,10 +203,13 @@ export const toggleNode = (
     }
   });
   edges.forEach((edge) => {
+    if (edge.data?.kind !== 'container') {
+      return;
+    }
     const childVisible = nodes.some(
       (node) => node.id === edge.target && node.data.visible
     );
-    edge.data = { visible: edge.source === id && childVisible };
+    edge.data = { kind: 'container', visible: edge.source === id && childVisible };
   });
 };
 

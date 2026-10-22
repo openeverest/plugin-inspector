@@ -23,4 +23,15 @@ export const Messages = {
   collapseRow: 'Hide containers',
   expandGroup: 'Show pods',
   collapseGroup: 'Hide pods',
+  service: 'Service',
+  services: 'Services',
+  endpointsReady: (ready: number, total: number) => `${ready}/${total} endpoints`,
+  serviceColumns: {
+    status: 'Status',
+    name: 'Name',
+    clusterIP: 'Cluster IP',
+    externalAddress: 'External address',
+    ports: 'Ports',
+    endpoints: 'Endpoints',
+  },
 };

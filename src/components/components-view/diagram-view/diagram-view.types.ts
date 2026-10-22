@@ -1,5 +1,6 @@
 import type { Edge, Node } from '@xyflow/react';
 import { ComponentGroup, Container, InstanceComponent } from 'types/components.types';
+import { InstanceService } from 'types/services.types';
 
 interface NodeData<T> extends Record<string, unknown> {
   selected?: boolean;
@@ -18,6 +19,8 @@ interface GroupNodeData extends NodeData<ComponentGroup> {
 export type ComponentNodeType = Node<NodeData<InstanceComponent>, 'componentNode'>;
 export type ContainerNodeType = Node<ContainerNodeData, 'containerNode'>;
 export type GroupNodeType = Node<GroupNodeData, 'groupNode'>;
-export type CustomNode = ComponentNodeType | ContainerNodeType | GroupNodeType;
+export type ServiceNodeType = Node<NodeData<InstanceService>, 'serviceNode'>;
+export type CustomNode = ComponentNodeType | ContainerNodeType | GroupNodeType | ServiceNodeType;
 
-export type CustomEdge = Edge<{ visible?: boolean }>;
+/** Pod → container edges toggle with the pod; service → pod endpoint edges always show. */
+export type CustomEdge = Edge<{ kind: 'container' | 'endpoint'; visible: boolean }>;

@@ -44,6 +44,7 @@ export const ComponentNode = ({ data }: NodeProps<ComponentNodeType>) => {
       height={COMPONENT_NODE_HEIGHT}
       elevated={data.selected}
       clickable
+      showTopHandle
       showBottomHandle
       dataTestId={`component-node-${name}`}
     >

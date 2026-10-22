@@ -5,8 +5,13 @@ import { InspectorContext } from 'components/inspector-context/inspector.context
 import { LogsPanel } from 'components/logs-panel/logs-panel';
 import { PodDescribeDrawer } from 'components/pod-describe-drawer/pod-describe-drawer';
 import { useInstanceComponents } from 'hooks/useInstanceComponents';
+import { useInstanceServices } from 'hooks/useInstanceServices';
 import { LogsSelection } from 'types/components.types';
+import { InstanceService } from 'types/services.types';
 import { Messages } from './inspector-tab.messages';
+
+// Stable while services are loading or failed, so the diagram isn't rebuilt on every render.
+const NO_SERVICES: InstanceService[] = [];
 
 interface InspectorTabProps {
   namespace: string;
@@ -16,6 +21,8 @@ interface InspectorTabProps {
 export const InspectorTab = ({ namespace, instanceName }: InspectorTabProps) => {
   const target = useMemo(() => ({ namespace, instanceName }), [namespace, instanceName]);
   const { data: components = [], isLoading, error } = useInstanceComponents(target);
+  // Services are supplementary, so failing to load them doesn't hide the pods.
+  const { data: services = NO_SERVICES, error: servicesError } = useInstanceServices(target);
   const [selection, setSelection] = useState<LogsSelection | null>(null);
   // Lives here so it survives the logs panel remounting on pod/container change.
   const [logFilter, setLogFilter] = useState('');
@@ -51,7 +58,10 @@ export const InspectorTab = ({ namespace, instanceName }: InspectorTabProps) => 
         {!error && components.length === 0 && (
           <Alert severity="info">{Messages.noComponents}</Alert>
         )}
-        {components.length > 0 && <ComponentsView components={components} />}
+        {servicesError && (
+          <Alert severity="warning">{Messages.servicesLoadFailed(servicesError.message)}</Alert>
+        )}
+        {components.length > 0 && <ComponentsView components={components} services={services} />}
         {selection && (
           <Box ref={logsRef}>
             <LogsPanel

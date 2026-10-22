@@ -12,9 +12,11 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { Box, Button, styled } from '@mui/material';
 import { SUNKEN_SURFACE_SX } from 'components/surface.constants';
 import { InstanceComponent } from 'types/components.types';
+import { InstanceService } from 'types/services.types';
 import { Messages } from '../components-view.messages';
 import { ComponentNode } from './component-node/component-node';
 import { ContainerNode } from './container-node/container-node';
+import { ENDPOINT_NOT_READY_CLASS } from './diagram-view.constants';
 import { CustomEdge, CustomNode } from './diagram-view.types';
 import {
   buildGraph,
@@ -24,11 +26,13 @@ import {
   visibleGraph,
 } from './diagram-view.utils';
 import { GroupNode } from './group-node/group-node';
+import { ServiceNode } from './service-node/service-node';
 
 const NODE_TYPES = {
   componentNode: ComponentNode,
   containerNode: ContainerNode,
   groupNode: GroupNode,
+  serviceNode: ServiceNode,
 };
 
 const ReactFlowStyled = styled(ReactFlow<CustomNode, CustomEdge>)(({ theme }) => ({
@@ -38,13 +42,18 @@ const ReactFlowStyled = styled(ReactFlow<CustomNode, CustomEdge>)(({ theme }) =>
   '--xy-controls-button-color': theme.palette.text.primary,
   // Only a group's header is interactive, so the rest of the frame pans the canvas.
   '& .react-flow__node-groupNode': { pointerEvents: 'none' },
+  [`& .${ENDPOINT_NOT_READY_CLASS} .react-flow__edge-path`]: {
+    stroke: theme.palette.warning.main,
+    strokeDasharray: '6 4',
+  },
 }));
 
 interface ComponentsDiagramViewProps {
   components: InstanceComponent[];
+  services: InstanceService[];
 }
 
-export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps) => {
+export const ComponentsDiagramView = ({ components, services }: ComponentsDiagramViewProps) => {
   const graph = useRef<{ nodes: CustomNode[]; edges: CustomEdge[] }>({
     nodes: [],
     edges: [],
@@ -66,9 +75,14 @@ export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps
 
   // Rebuilt on every poll, keeping the user's selected pod expanded.
   useEffect(() => {
-    graph.current = buildGraph(components, selectedId.current, collapsedGroupIds.current);
+    graph.current = buildGraph(
+      components,
+      services,
+      selectedId.current,
+      collapsedGroupIds.current
+    );
     showVisible();
-  }, [components, showVisible]);
+  }, [components, services, showVisible]);
 
   const handleNodesChange = useCallback(
     (changes: NodeChange<CustomNode>[]) => {
@@ -82,7 +96,7 @@ export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps
 
   const handleNodeClick = useCallback(
     (_: MouseEvent, node: CustomNode) => {
-      if (node.type === 'containerNode') {
+      if (node.type === 'containerNode' || node.type === 'serviceNode') {
         return;
       }
       if (node.type === 'groupNode') {

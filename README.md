@@ -5,6 +5,8 @@ A generic plugin for [OpenEverest](https://github.com/openeverest/openeverest) t
 
 - See the pods behind an instance as a diagram or a table, grouped by component
   (e.g. engine, configServer, proxy), with status, readiness, restarts and node placement
+- See the Services in front of each component: type, cluster and external addresses,
+  ports, and which pods are ready endpoints
 - Stream or tail container logs
 - Describe a pod: containers, conditions and events, similar to `kubectl describe`
 
@@ -32,12 +34,13 @@ Browser → GET /v1/clusters/{cluster}/plugins/{name}/api/components?...
          ↓ (host validates session, forwards the user's JWT)
 Backend → GET instance from the OpenEverest API as the user (enforces RBAC)
          ↓
-Backend → list/get pods, logs and events with its own ServiceAccount
+Backend → list/get pods, logs, events, Services and EndpointSlices with its own ServiceAccount
          ↓
 Browser ← JSON / log stream
 ```
 
-A user can only see pods of instances they are allowed to read. The backend
+A user can only see pods of instances they are allowed to read, and only the
+Services whose selector matches those pods. The backend
 reads Kubernetes with its own ServiceAccount, so it only sees the cluster it is
 installed in.
 

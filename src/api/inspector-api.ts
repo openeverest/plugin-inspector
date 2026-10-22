@@ -1,6 +1,7 @@
 import type { PluginApi } from '@openeverest/plugin-sdk';
 import { InstanceComponent } from 'types/components.types';
 import { PodDescription } from 'types/describe.types';
+import { InstanceService } from 'types/services.types';
 
 type PluginFetch = PluginApi['fetch'];
 
@@ -36,6 +37,17 @@ export const getInstanceComponents = async (
   const response = await pluginFetch(
     `/api/components?${instanceParams(target)}`
   );
+  if (!response.ok) {
+    throw await errorFromResponse(response);
+  }
+  return response.json();
+};
+
+export const getInstanceServices = async (
+  pluginFetch: PluginFetch,
+  target: InstanceTarget
+): Promise<InstanceService[]> => {
+  const response = await pluginFetch(`/api/services?${instanceParams(target)}`);
   if (!response.ok) {
     throw await errorFromResponse(response);
   }

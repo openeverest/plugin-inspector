@@ -8,6 +8,7 @@ import {
   TextField,
 } from '@mui/material';
 import { InstanceComponent } from 'types/components.types';
+import { InstanceService } from 'types/services.types';
 import { Messages } from './components-view.messages';
 import { filterComponents } from './components-view.utils';
 import { ComponentsDiagramView } from './diagram-view/components-diagram-view';
@@ -15,9 +16,10 @@ import { ComponentsTableView } from './table-view/components-table-view';
 
 interface ComponentsViewProps {
   components: InstanceComponent[];
+  services: InstanceService[];
 }
 
-export const ComponentsView = ({ components }: ComponentsViewProps) => {
+export const ComponentsView = ({ components, services }: ComponentsViewProps) => {
   const [tableView, setTableView] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const filtered = useMemo(
@@ -47,10 +49,10 @@ export const ComponentsView = ({ components }: ComponentsViewProps) => {
         />
       </Box>
       {tableView ? (
-        <ComponentsTableView components={filtered} />
+        <ComponentsTableView components={filtered} services={services} />
       ) : (
         <ReactFlowProvider>
-          <ComponentsDiagramView components={filtered} />
+          <ComponentsDiagramView components={filtered} services={services} />
         </ReactFlowProvider>
       )}
     </Stack>
