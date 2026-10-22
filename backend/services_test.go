@@ -104,6 +104,15 @@ func TestServices(t *testing.T) {
 	assert.Equal(t, []servicePod{{Name: "mydb-0", Ready: true}}, rs.Pods, "unknown readiness counts as ready")
 }
 
+func TestServicesReturnsEmptyListBeforeAnyServiceExists(t *testing.T) {
+	mux := newTestMux(t, []instanceComponent{engineComponent}, everestPod("mydb-0", "mydb", "engine"))
+
+	rec := doRequest(mux, "/api/services", instanceQuery(nil), validToken)
+
+	require.Equal(t, http.StatusOK, rec.Code, rec.Body.String())
+	assert.JSONEq(t, "[]", rec.Body.String())
+}
+
 func TestServicesRequiresAuthorization(t *testing.T) {
 	mux := newTestMux(t, nil, testPod("mydb-0", "mydb"))
 

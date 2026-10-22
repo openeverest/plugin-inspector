@@ -21,6 +21,10 @@ export interface ComponentLogsOptions {
 const instanceParams = ({ namespace, instanceName }: InstanceTarget) =>
   new URLSearchParams({ namespace, instance: instanceName });
 
+// An empty Go slice can encode as null; a list endpoint always yields an array.
+const listFromResponse = async <T>(response: Response): Promise<T[]> =>
+  (await response.json()) ?? [];
+
 const errorFromResponse = async (response: Response) => {
   const body = await response.json().catch(() => null);
   const message =
@@ -40,7 +44,7 @@ export const getInstanceComponents = async (
   if (!response.ok) {
     throw await errorFromResponse(response);
   }
-  return response.json();
+  return listFromResponse(response);
 };
 
 export const getInstanceServices = async (
@@ -51,7 +55,7 @@ export const getInstanceServices = async (
   if (!response.ok) {
     throw await errorFromResponse(response);
   }
-  return response.json();
+  return listFromResponse(response);
 };
 
 export const getPodDescription = async (
