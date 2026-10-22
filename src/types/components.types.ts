@@ -25,7 +25,8 @@ export interface Container {
 /** A pod backing the instance, as returned by the plugin backend. */
 export interface InstanceComponent {
   name: string;
-  type: string;
+  /** The instance component the pod belongs to, e.g. engine or proxy. */
+  component?: string;
   status: ComponentStatus;
   /** Why the pod is stuck, e.g. Unschedulable or ImagePullBackOff. */
   reason?: string;
@@ -35,6 +36,12 @@ export interface InstanceComponent {
   /** Ready containers over total, e.g. "2/3". */
   ready: string;
   containers: Container[];
+}
+
+/** The pods of one instance component. An empty name holds pods of no component. */
+export interface ComponentGroup {
+  name: string;
+  pods: InstanceComponent[];
 }
 
 export interface LogsSelection {

@@ -14,7 +14,7 @@ const component = (
 ): InstanceComponent => ({
   name,
   status,
-  type: 'engine',
+  component: 'engine',
   restarts: 0,
   ready: '1/1',
   containers: [],

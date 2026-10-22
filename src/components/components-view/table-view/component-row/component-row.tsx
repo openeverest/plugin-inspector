@@ -48,7 +48,6 @@ export const ComponentRow = ({ component }: ComponentRowProps) => {
         </TableCell>
         <TableCell>{component.ready}</TableCell>
         <TableCell>{component.name}</TableCell>
-        <TableCell>{component.type}</TableCell>
         <TableCell>{component.nodeName}</TableCell>
         <TableCell>
           <ComponentAge date={component.started} />

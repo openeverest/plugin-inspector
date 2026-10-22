@@ -11,7 +11,6 @@ export const TABLE_COLUMNS: ColumnDefinition[] = [
   { label: Messages.columns.status, sortKey: 'status' },
   { label: Messages.columns.ready },
   { label: Messages.columns.name, sortKey: 'name' },
-  { label: Messages.columns.type, sortKey: 'type' },
   { label: Messages.columns.node, sortKey: 'nodeName' },
   { label: Messages.columns.age },
   { label: Messages.columns.restarts, sortKey: 'restarts' },

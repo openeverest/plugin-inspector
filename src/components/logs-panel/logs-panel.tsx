@@ -151,7 +151,7 @@ export const LogsPanel = ({
           >
             {pods.map((c) => (
               <MenuItem key={c.name} value={c.name}>
-                {c.type ? `${c.name} (${c.type})` : c.name}
+                {c.component ? `${c.name} (${c.component})` : c.name}
               </MenuItem>
             ))}
           </Select>

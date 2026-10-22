@@ -4,7 +4,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import {
   Box,
-  Chip,
   IconButton,
   Stack,
   Tooltip,
@@ -25,7 +24,7 @@ import { DiagramNode } from '../diagram-node/diagram-node';
 
 export const ComponentNode = ({ data }: NodeProps<ComponentNodeType>) => {
   const component = data.componentData;
-  const { name, status, reason, ready, type, restarts, started, nodeName } = component;
+  const { name, status, reason, ready, restarts, started, nodeName } = component;
   const { viewLogs, describePod } = useInspectorContext();
 
   // Node clicks toggle the containers, so actions must not bubble up.
@@ -75,15 +74,7 @@ export const ComponentNode = ({ data }: NodeProps<ComponentNodeType>) => {
           </Typography>
         )}
       </Stack>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mt: 'auto',
-        }}
-      >
-        {type ? <Chip label={type} size="small" /> : <span />}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto' }}>
         <Box sx={{ display: 'flex' }}>
           <Tooltip title={Messages.describe}>
             <IconButton onClick={handleDescribe} size="small" aria-label={Messages.describe}>

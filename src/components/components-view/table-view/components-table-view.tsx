@@ -9,8 +9,9 @@ import {
   TableSortLabel,
 } from '@mui/material';
 import { InstanceComponent } from 'types/components.types';
+import { groupComponents } from 'utils/component-groups.utils';
 import { Messages } from '../components-view.messages';
-import { ComponentRow } from './component-row/component-row';
+import { GroupRows } from './group-rows/group-rows';
 import { TABLE_COLUMN_COUNT, TABLE_COLUMNS } from './table-view.constants';
 import { SortKey, SortOrder } from './table-view.types';
 import { sortComponents } from './table-view.utils';
@@ -22,8 +23,12 @@ interface ComponentsTableViewProps {
 export const ComponentsTableView = ({ components }: ComponentsTableViewProps) => {
   const [sortKey, setSortKey] = useState<SortKey>('status');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const sorted = useMemo(
-    () => sortComponents(components, sortKey, sortOrder),
+  const groups = useMemo(
+    () =>
+      groupComponents(components).map((group) => ({
+        ...group,
+        pods: sortComponents(group.pods, sortKey, sortOrder),
+      })),
     [components, sortKey, sortOrder]
   );
 
@@ -61,16 +66,14 @@ export const ComponentsTableView = ({ components }: ComponentsTableViewProps) =>
           </TableRow>
         </TableHead>
         <TableBody>
-          {sorted.length === 0 ? (
+          {groups.length === 0 ? (
             <TableRow>
               <TableCell colSpan={TABLE_COLUMN_COUNT} align="center">
                 {Messages.noComponents}
               </TableCell>
             </TableRow>
           ) : (
-            sorted.map((component) => (
-              <ComponentRow key={component.name} component={component} />
-            ))
+            groups.map((group) => <GroupRows key={group.name} group={group} />)
           )}
         </TableBody>
       </Table>

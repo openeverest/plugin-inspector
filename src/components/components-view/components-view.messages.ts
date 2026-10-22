@@ -14,7 +14,6 @@ export const Messages = {
     status: 'Status',
     ready: 'Ready',
     name: 'Name',
-    type: 'Type',
     node: 'Node',
     age: 'Age',
     restarts: 'Restarts',
@@ -22,4 +21,6 @@ export const Messages = {
   },
   expandRow: 'Show containers',
   collapseRow: 'Hide containers',
+  expandGroup: 'Show pods',
+  collapseGroup: 'Hide pods',
 };

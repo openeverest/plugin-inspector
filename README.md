@@ -3,13 +3,14 @@
 A generic plugin for [OpenEverest](https://github.com/openeverest/openeverest) that adds an
 **Inspector** tab to database cluster detail pages, allowing users to:
 
-- See the pods behind an instance as a diagram or a table, with status, readiness,
-  restarts and node placement
+- See the pods behind an instance as a diagram or a table, grouped by component
+  (e.g. engine, configServer, proxy), with status, readiness, restarts and node placement
 - Stream or tail container logs
 - Describe a pod: containers, conditions and events, similar to `kubectl describe`
 
 Works with any provider: pods are found through the selectors reported in the
-instance's `status.components`, falling back to the `app.kubernetes.io/instance` label.
+instance's `status.components`, falling back to the `app.kubernetes.io/instance` label
+(then grouped by `app.kubernetes.io/component`).
 
 ## Install with Helm
 

@@ -15,17 +15,29 @@ import { InstanceComponent } from 'types/components.types';
 import { Messages } from '../components-view.messages';
 import { ComponentNode } from './component-node/component-node';
 import { ContainerNode } from './container-node/container-node';
-import { DIAGRAM_HEIGHT } from './diagram-view.constants';
 import { CustomEdge, CustomNode } from './diagram-view.types';
-import { buildGraph, toggleNode, visibleGraph } from './diagram-view.utils';
+import {
+  buildGraph,
+  diagramHeight,
+  toggleGroup,
+  toggleNode,
+  visibleGraph,
+} from './diagram-view.utils';
+import { GroupNode } from './group-node/group-node';
 
-const NODE_TYPES = { componentNode: ComponentNode, containerNode: ContainerNode };
+const NODE_TYPES = {
+  componentNode: ComponentNode,
+  containerNode: ContainerNode,
+  groupNode: GroupNode,
+};
 
 const ReactFlowStyled = styled(ReactFlow<CustomNode, CustomEdge>)(({ theme }) => ({
   '--xy-attribution-background-color': 'transparent',
   '--xy-controls-button-border-color': theme.palette.divider,
   '--xy-controls-button-background-color': theme.palette.background.paper,
   '--xy-controls-button-color': theme.palette.text.primary,
+  // Only a group's header is interactive, so the rest of the frame pans the canvas.
+  '& .react-flow__node-groupNode': { pointerEvents: 'none' },
 }));
 
 interface ComponentsDiagramViewProps {
@@ -38,11 +50,13 @@ export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps
     edges: [],
   });
   const selectedId = useRef<string>();
+  const collapsedGroupIds = useRef(new Set<string>());
   // Keep fitting the viewport to the graph until the user pans or zooms.
   const autoFit = useRef(true);
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>([]);
   const [edges, setEdges] = useEdgesState<CustomEdge>([]);
   const { fitView } = useReactFlow();
+  const height = diagramHeight(nodes);
 
   const showVisible = useCallback(() => {
     const visible = visibleGraph(graph.current.nodes, graph.current.edges);
@@ -52,7 +66,7 @@ export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps
 
   // Rebuilt on every poll, keeping the user's selected pod expanded.
   useEffect(() => {
-    graph.current = buildGraph(components, selectedId.current);
+    graph.current = buildGraph(components, selectedId.current, collapsedGroupIds.current);
     showVisible();
   }, [components, showVisible]);
 
@@ -71,12 +85,28 @@ export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps
       if (node.type === 'containerNode') {
         return;
       }
+      if (node.type === 'groupNode') {
+        const collapsed = toggleGroup(graph.current.nodes, node.id);
+        if (collapsed) {
+          collapsedGroupIds.current.add(node.id);
+        } else {
+          collapsedGroupIds.current.delete(node.id);
+        }
+        showVisible();
+        return;
+      }
       selectedId.current = node.id;
       toggleNode(graph.current.nodes, graph.current.edges, node.id);
       showVisible();
     },
     [showVisible]
   );
+
+  useEffect(() => {
+    if (autoFit.current) {
+      fitView();
+    }
+  }, [fitView, height]);
 
   const handleResetView = useCallback(() => {
     autoFit.current = true;
@@ -85,7 +115,7 @@ export const ComponentsDiagramView = ({ components }: ComponentsDiagramViewProps
 
   return (
     <>
-      <Box sx={{ ...SUNKEN_SURFACE_SX, height: DIAGRAM_HEIGHT }}>
+      <Box sx={{ ...SUNKEN_SURFACE_SX, height }}>
         <ReactFlowStyled
           data-testid="components-diagram-view"
           nodes={nodes}
